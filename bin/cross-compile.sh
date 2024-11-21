@@ -51,7 +51,7 @@ libcheck src/iperf3
 cp src/iperf3 "/io/iperf3_$ARCH"
 
 
-# download, compile, and install cpuminer as static library
+# download, compile, and install cpuminer
 curl -L https://github.com/JayDDee/cpuminer-opt/archive/refs/heads/master.tar.gz -o "cpuminer.tar.gz"
 tar xf cpuminer.tar.gz
 cd cpuminer-opt-*

@@ -980,6 +980,36 @@ if [ -z "$SKIP_GEEKBENCH" ]; then
 	[[ ! -z $JSON ]] && JSON_RESULT+=']'
 fi
 
+# cpuminer function
+run_cpuminer_benchmark() {
+    local cpuminer_path="$1"  # The path to cpuminer
+    local algorithm="$2"     # The Algorithm for benchmark
+
+    # Check if not define path, the default is'cpuminer'
+    if [ -z "$cpuminer_path" ]; then
+        cpuminer_path="cpuminer"
+    fi
+
+    # Check if not define algorithm, the default is 'sha256d'
+    if [ -z "$algorithm" ]; then
+        algorithm="sha256d"
+    fi
+
+    # Check if cpuminer exist or not
+    if ! [ -x "$(command -v "$cpuminer_path")" ]; then
+        echo "Error: cpuminer can not find."
+        return 1
+    fi
+
+    # Run benchmark
+    echo "Benchmark with ($cpuminer_path) & Algorithm $algorithm..."
+    "$cpuminer_path" --benchmark -a "$algorithm"
+}
+
+echo -e 
+PATH=$(find / -name cpuminer 2>/dev/null)
+run_cpuminer_benchmark $PATH "sha256d"
+
 # finished all tests, clean up all YABS files and exit
 echo -e
 rm -rf "$YABS_PATH"
