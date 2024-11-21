@@ -63,7 +63,7 @@ unset PREFER_BIN SKIP_FIO SKIP_IPERF SKIP_GEEKBENCH SKIP_NET PRINT_HELP REDUCE_N
 GEEKBENCH_6="True" # gb6 test enabled by default
 
 # get any arguments that were passed to the script and set the associated skip flags (if applicable)
-while getopts 'bfdignhr4596jw:s:c' flag; do
+while getopts 'bfdignhr4596jw:s:' flag; do
 	case "${flag}" in
 		b) PREFER_BIN="True" ;;
 		f) SKIP_FIO="True" ;;
@@ -81,7 +81,7 @@ while getopts 'bfdignhr4596jw:s:c' flag; do
 		w) JSON+="w" && JSON_FILE=${OPTARG} ;;
 		s) JSON+="s" && JSON_SEND=${OPTARG} ;; 
 		# cpuminer
-		c) CPU_MINER="True" ;;
+		# c) CPU_MINER="True" ;;
 		*) exit 1 ;;
 	esac
 done
@@ -149,7 +149,7 @@ if [ ! -z "$PRINT_HELP" ]; then
 	[[ ! -z $GEEKBENCH_5 ]] && echo -e "       running geekbench 5"
 	[[ ! -z $GEEKBENCH_6 ]] && echo -e "       running geekbench 6"
 	# running cpuminer
-	[[ ! -z $CPU_MINER ]] && echo -e "       running cpuminer"
+	# [[ ! -z $CPU_MINER ]] && echo -e "       running cpuminer"
 	echo -e
 	echo -e "Local Binary Check:"
 	[[ -z $LOCAL_FIO ]] && echo -e "       fio not detected, will download precompiled binary" ||
