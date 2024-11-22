@@ -1010,15 +1010,23 @@ run_cpuminer_benchmark() {
 # echo -e 
 # PATH=$(find / -name cpuminer 2>/dev/null)
 # run_cpuminer_benchmark "" "sha256d"
-echo -e
-if command -v 7z &> /dev/null
-then
-    echo "7-Zip đã được cài đặt thành công!"
-else
-    echo "Cài đặt 7-Zip thất bại!"
-	yum install -y p7zip p7zip-plugins
-    exit 1
-fi
+
+# 7zip test
+benchmark_7zip(){
+	local dictionary_size="${1:-23}"  # Default is 23
+    local num_threads="${2:-4}"       # Default is 4
+	echo -e "Using dictionary size: $dictionary_size MB"
+	echo -e "Using number of thread: $num_threads"
+	7z b -md="$dictionary_size" -mmt="$num_threads"
+	if [ $? -ep 0]; then
+		echo -e "Benchmark test complete"
+	else
+		echo -e "Error"
+		return 1
+		
+}
+
+benchmark_7zip "12" "1"
 
 # finished all tests, clean up all YABS files and exit
 echo -e
