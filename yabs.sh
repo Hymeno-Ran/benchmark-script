@@ -1041,22 +1041,23 @@ if [ -z "$SKIP_7ZIP" ]; then
 
         # download 7zip binary
         if [[ ! -z $LOCAL_CURL ]]; then
-            curl -s --connect-timeout 5 --retry 5 --retry-delay 0 https://www.7-zip.org/a/7z2201-src.tar.xz -o "$ZIP_PATH/7zip.tar.xz"
+            curl -s --connect-timeout 5 --retry 5 --retry-delay 0 https://www.7-zip.org/a/7z2201-src.tar.xz -o "$ZIP_PATH/7z2201-src.tar.xz"
         else
-            wget -q -T 5 -t 5 -w 0 https://www.7-zip.org/a/7z2201-src.tar.xz -O "$ZIP_PATH/7zip.tar.xz"
+            wget -q -T 5 -t 5 -w 0 https://www.7-zip.org/a/7z2201-src.tar.xz -O "$ZIP_PATH/7z2201-src.tar.xz"
         fi
 
-        if [ ! -f "$ZIP_PATH/7zip.tar.xz" ]; then
+        if [ ! -f "$ZIP_PATH/7z2201-src.tar.xz" ]; then
             ZIP_DL_FAIL=True
         else
             # Extract and compile 7zip if download is successful
-            tar -xf "$ZIP_PATH/7zip.tar.xz" -C "$ZIP_PATH"
-            cd "$ZIP_PATH/7z2201"
-            make
+            tar -xf "$ZIP_PATH/7z2201-src.tar.xz" -C $ZIP_PATH
+			cd "$ZIP_PATH/CPP/7zip"
+            make -f makefile
 
-            if [ -f "$ZIP_PATH/7z2201/src/7z" ]; then
-                chmod +x "$ZIP_PATH/7z2201/src/7z"
-                ZIP_CMD="$ZIP_PATH/7z2201/src/7z"
+            if [ -f "$ZIP_PATH/CPP" ]; then
+				echo -e $ZIP_PATH
+				chmod -r+x "$ZIP_PATH"
+				ZIP_CMD=$ZIP_PATH
             else
                 ZIP_DL_FAIL=True
             fi
