@@ -67,3 +67,7 @@ cd cpuminer-opt-*
 ./autogen.sh
 ./configure --disable-shared --disable-static
 make
+
+
+# download, compile, and install 7zip as static library
+yum install -y p7zip p7zip-plugins

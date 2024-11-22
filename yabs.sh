@@ -1007,9 +1007,18 @@ run_cpuminer_benchmark() {
 	# cpuminer
 }
 
-echo -e 
-PATH=$(find / -name cpuminer 2>/dev/null)
-run_cpuminer_benchmark "" "sha256d"
+# echo -e 
+# PATH=$(find / -name cpuminer 2>/dev/null)
+# run_cpuminer_benchmark "" "sha256d"
+echo -e
+# yum install -y p7zip-full
+if command -v 7z &> /dev/null
+then
+    echo "7-Zip đã được cài đặt thành công!"
+else
+    echo "Cài đặt 7-Zip thất bại!"
+    exit 1
+fi
 
 # finished all tests, clean up all YABS files and exit
 echo -e
