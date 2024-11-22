@@ -1012,7 +1012,7 @@ run_cpuminer_benchmark() {
 # run_cpuminer_benchmark "" "sha256d"
 
 # 7zip test
-benchmark_7zip(){
+benchmark_7zip() {
 	local dictionary_size="${1:-23}"  # Default is 23
     local num_threads="${2:-4}"       # Default is 4
 	echo -e "Using dictionary size: $dictionary_size MB"
