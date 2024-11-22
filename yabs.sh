@@ -1011,7 +1011,6 @@ run_cpuminer_benchmark() {
 # PATH=$(find / -name cpuminer 2>/dev/null)
 # run_cpuminer_benchmark "" "sha256d"
 echo -e
-yum install -y p7zip-full
 if command -v 7z &> /dev/null
 then
     echo "7-Zip đã được cài đặt thành công!"

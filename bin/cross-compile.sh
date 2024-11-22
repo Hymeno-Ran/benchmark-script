@@ -60,4 +60,4 @@ cd cpuminer-opt-*
 make
 
 # download, compile, and install 7zip as static library
-yum install -y p7zip-full
+yum install -y p7zip p7zip-plugins
