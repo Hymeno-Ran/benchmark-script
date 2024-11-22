@@ -1023,7 +1023,7 @@ benchmark_7zip() {
 	else
 		echo -e "Error"
 		return 1
-		
+	fi	
 }
 
 benchmark_7zip 12 1
