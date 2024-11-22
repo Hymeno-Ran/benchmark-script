@@ -1052,7 +1052,7 @@ if [ -z "$SKIP_7ZIP" ]; then
             # Extract and compile 7zip if download is successful
             tar -xf "$ZIP_PATH/7z2201-src.tar.xz" -C $ZIP_PATH
 			cd "$ZIP_PATH/CPP/7zip"
-            make -f makefile
+            make
 
             if [ -f "$ZIP_PATH/CPP" ]; then
 				echo -e $ZIP_PATH
