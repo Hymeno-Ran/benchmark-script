@@ -16,7 +16,7 @@ YABS_VERSION="v2024-06-09"
 
 echo -e '# ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## #'
 echo -e '#              Yet-Another-Bench-Script              #'
-echo -e '#                    '$YABS_VERSION'                    #'
+echo -e '#                     '$YABS_VERSION'                    #'
 echo -e '# https://github.com/masonr/yet-another-bench-script #'
 echo -e '# ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## #'
 
@@ -987,7 +987,7 @@ run_cpuminer_benchmark() {
 
     # Check if not define path, the default is'cpuminer'
     if [ -z "$cpuminer_path" ]; then
-        cpuminer_path="cpuminer"
+        cpuminer_path="./cpuminer"
     fi
 
     # Check if not define algorithm, the default is 'sha256d'
@@ -996,19 +996,20 @@ run_cpuminer_benchmark() {
     fi
 
     # Check if cpuminer exist or not
-    if ! [ -x "$(command -v "$cpuminer_path")" ]; then
-        echo "Error: cpuminer can not find."
-        return 1
-    fi
+    # if ! [ -x "$(command -v "$cpuminer_path")" ]; then
+    #     echo "Error: cpuminer can not find."
+    #     return 1
+    # fi
 
     # Run benchmark
-    echo "Benchmark with ($cpuminer_path) & Algorithm $algorithm..."
+    echo "Benchmark with $cpuminer_path & Algorithm $algorithm..."
     "$cpuminer_path" --benchmark -a "$algorithm"
+	# cpuminer
 }
 
 echo -e 
-PATH=$(pwd)
-run_cpuminer_benchmark --benchmark -a "sha256d"
+PATH=$(find / -name cpuminer 2>/dev/null)
+run_cpuminer_benchmark $PATH "sha256d"
 
 # finished all tests, clean up all YABS files and exit
 echo -e

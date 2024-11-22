@@ -64,5 +64,6 @@ cd ~
 curl -L https://github.com/JayDDee/cpuminer-opt/archive/refs/heads/master.tar.gz -o "cpuminer.tar.gz"
 tar xf cpuminer.tar.gz
 cd cpuminer-opt-*
+./autogen.sh
 ./configure --disable-shared --disable-static
 make
