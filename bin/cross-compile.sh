@@ -60,4 +60,14 @@ cd cpuminer-opt-*
 make
 
 # download, compile, and install 7zip as static library
-yum install -y p7zip p7zip-plugins
+cd ~
+curl -L https://www.7-zip.org/a/7z2201-src.tar.xz -o "7zip-src.tar.xz"
+tar xf 7zip-src.tar.xz
+cd 7z2201
+CC=/root/${CROSS}-cross/bin/${CROSS}-gcc ./configure --disable-native --build-static
+make 
+
+# verify no external shared library links
+libcheck src/7z
+# copy 7z binary to mounted dir
+cp src/7z "/io/7zip_$ARCH"
