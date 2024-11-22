@@ -64,4 +64,5 @@ cd ~
 curl -L https://github.com/JayDDee/cpuminer-opt/archive/refs/heads/master.tar.gz -o "cpuminer.tar.gz"
 tar xf cpuminer.tar.gz
 cd cpuminer-opt-*
-sudo apt-get update && sudo apt-get install -y build-essential automake autoconf libcurl4-openssl-dev
+./configure --disable-shared --disable-static
+make
