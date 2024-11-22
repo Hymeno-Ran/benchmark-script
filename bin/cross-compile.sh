@@ -49,25 +49,3 @@ make
 libcheck src/iperf3
 # copy iperf binary to mounted dir
 cp src/iperf3 "/io/iperf3_$ARCH"
-
-
-# download, compile, and install cpuminer
-cd ~
-curl -L https://github.com/JayDDee/cpuminer-opt/archive/refs/heads/master.tar.gz -o "cpuminer.tar.gz"
-tar xf cpuminer.tar.gz
-cd cpuminer-opt-*
-./configure --disable-shared --disable-static
-make
-
-# download, compile, and install 7zip as static library
-cd ~
-curl -L https://www.7-zip.org/a/7z2201-src.tar.xz -o "7zip-src.tar.xz"
-tar xf 7zip-src.tar.xz
-cd 7z2201
-CC=/root/${CROSS}-cross/bin/${CROSS}-gcc ./configure --disable-native --build-static
-make 
-
-# verify no external shared library links
-libcheck src/7z
-# copy 7z binary to mounted dir
-cp src/7z "/io/7zip_$ARCH"

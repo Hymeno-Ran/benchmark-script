@@ -63,7 +63,7 @@ unset PREFER_BIN SKIP_FIO SKIP_IPERF SKIP_GEEKBENCH SKIP_NET PRINT_HELP REDUCE_N
 GEEKBENCH_6="True" # gb6 test enabled by default
 
 # get any arguments that were passed to the script and set the associated skip flags (if applicable)
-while getopts 'bfdignhr4596jw:s:c' flag; do
+while getopts 'bfdignhr4596jw:s:' flag; do
 	case "${flag}" in
 		b) PREFER_BIN="True" ;;
 		f) SKIP_FIO="True" ;;
@@ -80,8 +80,6 @@ while getopts 'bfdignhr4596jw:s:c' flag; do
 		j) JSON+="j" ;; 
 		w) JSON+="w" && JSON_FILE=${OPTARG} ;;
 		s) JSON+="s" && JSON_SEND=${OPTARG} ;; 
-		# cpuminer
-		c) CPU_MINER="True" ;;
 		*) exit 1 ;;
 	esac
 done
@@ -95,10 +93,6 @@ command -v ping >/dev/null 2>&1 && LOCAL_PING=true || unset LOCAL_PING
 
 # check for curl/wget
 command -v curl >/dev/null 2>&1 && LOCAL_CURL=true || unset LOCAL_CURL
-
-# check for cpuminer
-command -v cpuminer >/dev/null 2>&1 && LOCAL_CPUMINER=true || unset LOCAL_CPUMINER
-command -v cpuminer >/dev/null 2>&1 && LOCAL_7ZIP=true || unset LOCAL_7ZIP
 
 # test if the host has IPv4/IPv6 connectivity
 [[ ! -z $LOCAL_CURL ]] && IP_CHECK_CMD="curl -s -m 4" || IP_CHECK_CMD="wget -qO- -T 4"
@@ -149,8 +143,6 @@ if [ ! -z "$PRINT_HELP" ]; then
 	[[ ! -z $GEEKBENCH_4 ]] && echo -e "       running geekbench 4"
 	[[ ! -z $GEEKBENCH_5 ]] && echo -e "       running geekbench 5"
 	[[ ! -z $GEEKBENCH_6 ]] && echo -e "       running geekbench 6"
-	# running cpuminer
-	[[ ! -z $CPU_MINER ]] && echo -e "       running cpuminer"
 	echo -e
 	echo -e "Local Binary Check:"
 	[[ -z $LOCAL_FIO ]] && echo -e "       fio not detected, will download precompiled binary" ||
@@ -159,8 +151,6 @@ if [ ! -z "$PRINT_HELP" ]; then
 	[[ -z $LOCAL_IPERF ]] && echo -e "       iperf3 not detected, will download precompiled binary" ||
 		[[ -z $PREFER_BIN ]] && echo -e "       iperf3 detected, using local package" ||
 		echo -e "       iperf3 detected, but using precompiled binary instead"
-	[[ -z $LOCAL_7ZIP ]] && echo -e "       7zip not detected, will download precompiled binary" ||
-		[[ -z $PREFER_BIN ]] && echo -e "       7zip detected, using local package" ||
 	echo -e
 	echo -e "Detected Connectivity:"
 	[[ ! -z $IPV4_CHECK ]] && echo -e "       IPv4 connected" ||
@@ -982,97 +972,6 @@ if [ -z "$SKIP_GEEKBENCH" ]; then
 	[[ ! -z $JSON ]] && [[ $(echo -n $JSON_RESULT | tail -c 1) == ',' ]] && JSON_RESULT=${JSON_RESULT::${#JSON_RESULT}-1}
 	[[ ! -z $JSON ]] && JSON_RESULT+=']'
 fi
-
-# cpuminer function
-run_cpuminer_benchmark() {
-    local cpuminer_path="$1"  # The path to cpuminer
-    local algorithm="$2"     # The Algorithm for benchmark
-
-    # Check if not define path, the default is'cpuminer'
-    if [ -z "$cpuminer_path" ]; then
-        cpuminer_path="./cpuminer"
-    fi
-
-    # Check if not define algorithm, the default is 'sha256d'
-    if [ -z "$algorithm" ]; then
-        algorithm="sha256d"
-    fi
-
-    # Check if cpuminer exist or not
-    # if ! [ -x "$(command -v "$cpuminer_path")" ]; then
-    #     echo "Error: cpuminer can not find."
-    #     return 1
-    # fi
-
-    # Run benchmark
-    echo "Benchmark with $cpuminer_path & Algorithm $algorithm..."
-    "$cpuminer_path" --benchmark -a "$algorithm"
-	# cpuminer
-}
-
-# echo -e 
-# PATH=$(find / -name cpuminer 2>/dev/null)
-# run_cpuminer_benchmark "" "sha256d"
-
-# 7zip test
-benchmark_7zip() {
-	local dictionary_size="${1:-23}"  # Default is 23
-    local num_threads="${2:-4}"       # Default is 4
-	echo -e "Using dictionary size: $dictionary_size MB"
-	echo -e "Using number of thread: $num_threads"
-	7z b -md="$dictionary_size" -mmt="$num_threads"
-	if command; then
-		echo -e "Benchmark test complete"
-	else
-		echo -e "Error"
-		return 1
-	fi	
-}
-
-if [ -z "$SKIP_7ZIP" ]; then
-
-    if [[ -z "$PREFER_BIN" && ! -z "$LOCAL_7ZIP" ]]; then
-        # Local 7zip has been detected, use it instead of pre-compiled binary
-        ZIP_CMD=7z
-    else
-        # create a temp directory to house the required 7zip binary and library
-        ZIP_PATH=$YABS_PATH/7zip
-        mkdir -p "$ZIP_PATH"
-
-        # download 7zip binary
-        if [[ ! -z $LOCAL_CURL ]]; then
-            curl -s --connect-timeout 5 --retry 5 --retry-delay 0 https://www.7-zip.org/a/7z2201-src.tar.xz -o "$ZIP_PATH/7z2201-src.tar.xz"
-        else
-            wget -q -T 5 -t 5 -w 0 https://www.7-zip.org/a/7z2201-src.tar.xz -O "$ZIP_PATH/7z2201-src.tar.xz"
-        fi
-
-        if [ ! -f "$ZIP_PATH/7z2201-src.tar.xz" ]; then
-            ZIP_DL_FAIL=True
-        else
-            # Extract and compile 7zip if download is successful
-            tar -xf "$ZIP_PATH/7z2201-src.tar.xz" -C $ZIP_PATH
-			cd "$ZIP_PATH/CPP/7zip"
-            make
-
-            if [ -f "$ZIP_PATH/CPP" ]; then
-				echo -e $ZIP_PATH
-				chmod -r+x "$ZIP_PATH"
-				ZIP_CMD=$ZIP_PATH
-            else
-                ZIP_DL_FAIL=True
-            fi
-        fi
-    fi
-
-    # Check if 7zip was successfully downloaded and compiled
-    if [ -z "$ZIP_DL_FAIL" ]; then
-        # If not failed, perform 7zip operations, e.g., compression
-        $ZIP_CMD a "$YABS_PATH/output.7z" "$YABS_PATH/my_directory"
-    else
-        echo -e "\n7zip binary download or compilation failed. Skipping 7zip operations..."
-    fi
-fi
-
 
 # finished all tests, clean up all YABS files and exit
 echo -e
