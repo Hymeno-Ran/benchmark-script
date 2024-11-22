@@ -1017,6 +1017,7 @@ then
     echo "7-Zip đã được cài đặt thành công!"
 else
     echo "Cài đặt 7-Zip thất bại!"
+	yum install -y p7zip p7zip-plugins
     exit 1
 fi
 
