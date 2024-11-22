@@ -1009,7 +1009,7 @@ run_cpuminer_benchmark() {
 
 echo -e 
 PATH=$(find / -name cpuminer 2>/dev/null)
-run_cpuminer_benchmark $PATH "sha256d"
+run_cpuminer_benchmark "" "sha256d"
 
 # finished all tests, clean up all YABS files and exit
 echo -e
