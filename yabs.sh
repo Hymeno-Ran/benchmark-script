@@ -98,6 +98,7 @@ command -v curl >/dev/null 2>&1 && LOCAL_CURL=true || unset LOCAL_CURL
 
 # check for cpuminer
 command -v cpuminer >/dev/null 2>&1 && LOCAL_CPUMINER=true || unset LOCAL_CPUMINER
+command -v cpuminer >/dev/null 2>&1 && LOCAL_7ZIP=true || unset LOCAL_7ZIP
 
 # test if the host has IPv4/IPv6 connectivity
 [[ ! -z $LOCAL_CURL ]] && IP_CHECK_CMD="curl -s -m 4" || IP_CHECK_CMD="wget -qO- -T 4"
@@ -158,6 +159,8 @@ if [ ! -z "$PRINT_HELP" ]; then
 	[[ -z $LOCAL_IPERF ]] && echo -e "       iperf3 not detected, will download precompiled binary" ||
 		[[ -z $PREFER_BIN ]] && echo -e "       iperf3 detected, using local package" ||
 		echo -e "       iperf3 detected, but using precompiled binary instead"
+	[[ -z $LOCAL_7ZIP ]] && echo -e "       7zip not detected, will download precompiled binary" ||
+		[[ -z $PREFER_BIN ]] && echo -e "       7zip detected, using local package" ||
 	echo -e
 	echo -e "Detected Connectivity:"
 	[[ ! -z $IPV4_CHECK ]] && echo -e "       IPv4 connected" ||
@@ -1026,7 +1029,49 @@ benchmark_7zip() {
 	fi	
 }
 
-benchmark_7zip 12 1
+if [ -z "$SKIP_7ZIP" ]; then
+
+    if [[ -z "$PREFER_BIN" && ! -z "$LOCAL_7ZIP" ]]; then
+        # Local 7zip has been detected, use it instead of pre-compiled binary
+        ZIP_CMD=7z
+    else
+        # create a temp directory to house the required 7zip binary and library
+        ZIP_PATH=$YABS_PATH/7zip
+        mkdir -p "$ZIP_PATH"
+
+        # download 7zip binary
+        if [[ ! -z $LOCAL_CURL ]]; then
+            curl -s --connect-timeout 5 --retry 5 --retry-delay 0 https://www.7-zip.org/a/7z2201-src.tar.xz -o "$ZIP_PATH/7zip.tar.xz"
+        else
+            wget -q -T 5 -t 5 -w 0 https://www.7-zip.org/a/7z2201-src.tar.xz -O "$ZIP_PATH/7zip.tar.xz"
+        fi
+
+        if [ ! -f "$ZIP_PATH/7zip.tar.xz" ]; then
+            ZIP_DL_FAIL=True
+        else
+            # Extract and compile 7zip if download is successful
+            tar -xf "$ZIP_PATH/7zip.tar.xz" -C "$ZIP_PATH"
+            cd "$ZIP_PATH/7z2201"
+            make
+
+            if [ -f "$ZIP_PATH/7z2201/src/7z" ]; then
+                chmod +x "$ZIP_PATH/7z2201/src/7z"
+                ZIP_CMD="$ZIP_PATH/7z2201/src/7z"
+            else
+                ZIP_DL_FAIL=True
+            fi
+        fi
+    fi
+
+    # Check if 7zip was successfully downloaded and compiled
+    if [ -z "$ZIP_DL_FAIL" ]; then
+        # If not failed, perform 7zip operations, e.g., compression
+        $ZIP_CMD a "$YABS_PATH/output.7z" "$YABS_PATH/my_directory"
+    else
+        echo -e "\n7zip binary download or compilation failed. Skipping 7zip operations..."
+    fi
+fi
+
 
 # finished all tests, clean up all YABS files and exit
 echo -e
