@@ -1018,7 +1018,7 @@ benchmark_7zip() {
 	echo -e "Using dictionary size: $dictionary_size MB"
 	echo -e "Using number of thread: $num_threads"
 	7z b -md="$dictionary_size" -mmt="$num_threads"
-	if [ $? -ep 0]; then
+	if [ $? -ep 0 ]; then
 		echo -e "Benchmark test complete"
 	else
 		echo -e "Error"
