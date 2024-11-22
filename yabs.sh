@@ -1026,7 +1026,7 @@ benchmark_7zip(){
 		
 }
 
-benchmark_7zip "12" "1"
+benchmark_7zip 12 1
 
 # finished all tests, clean up all YABS files and exit
 echo -e
