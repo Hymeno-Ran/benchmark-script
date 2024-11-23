@@ -973,6 +973,63 @@ if [ -z "$SKIP_GEEKBENCH" ]; then
 	[[ ! -z $JSON ]] && JSON_RESULT+=']'
 fi
 
+# secondary library installation
+PACKAGES=("fio" "bc" "iperf3" "p7zip-full")
+    PACKAGES_TO_INSTALL=()
+    NOT_FOUND_PACKAGES=()
+
+    for pkg in "${PACKAGES[@]}"; do
+        if ! command -v "$pkg" &>/dev/null; then
+            PACKAGES_TO_INSTALL+=("$pkg")
+        fi
+    done
+
+    if [ ${#PACKAGES_TO_INSTALL[@]} -eq 0 ]; then
+        echo "All necessary apt packages found, continuing!"
+    else
+        echo "Installing missing packages..."
+        for pkg in "${PACKAGES_TO_INSTALL[@]}"; do
+            echo -n "Installing $pkg... "
+            if sudo yum install -y "$pkg" >/dev/null 2>&1; then
+                echo -e "\e[32m✓\e[0m"
+            else
+                echo -e "\e[31m✗\e[0m"
+                NOT_FOUND_PACKAGES+=("$pkg")
+            fi
+        done
+        
+        if [ ${#NOT_FOUND_PACKAGES[@]} -gt 0 ]; then
+            echo "The following packages were not found:"
+            for pkg in "${NOT_FOUND_PACKAGES[@]}"; do
+                echo -e "$pkg: \e[31mNot found ✗\e[0m"
+            done
+            
+
+            echo
+            if [[ ! $REPLY =~ ^[Yy]$ ]] && [[ ! -z $REPLY ]]; then
+                echo "Aborting..."
+                exit 1
+            fi
+        fi
+    fi
+# 7zip benchmark
+echo -e "Processor: $CPU_PROC"
+echo -e "CPU Cores: $CPU_CORES"
+echo -e "CPU Frequency: $CPU_FREQ"
+
+QuickAndDirtyPerformance=1000000   # assuming performance
+ClusterConfig=("config1" "config2" "config3")  # assuming 3 cluster
+RunHowManyTimes=10   # assuming running 10 times
+
+# single-threaded
+SingleThreadedDuration=$(( 20 + $(( ${QuickAndDirtyPerformance} * ${#ClusterConfig[@]} / 5000000 )) ))
+
+# cho multi-threaded
+MultiThreadedDuration=$(( ${RunHowManyTimes} * $(( 20 + $(( ${QuickAndDirtyPerformance} / 5000000 )) )) / ${CPU_CORES} ))
+
+echo "Single-threaded duration: ${SingleThreadedDuration} seconds"
+echo "Multi-threaded duration: ${MultiThreadedDuration} seconds"
+
 # finished all tests, clean up all YABS files and exit
 echo -e
 rm -rf "$YABS_PATH"
