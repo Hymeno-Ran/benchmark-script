@@ -1004,7 +1004,6 @@ PACKAGES=("fio" "bc" "iperf3" "p7zip-full")
                 echo -e "$pkg: \e[31mNot found ✗\e[0m"
             done
             
-
             echo
             if [[ ! $REPLY =~ ^[Yy]$ ]] && [[ ! -z $REPLY ]]; then
                 echo "Aborting..."
