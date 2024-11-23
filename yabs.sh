@@ -974,7 +974,7 @@ if [ -z "$SKIP_GEEKBENCH" ]; then
 fi
 
 # secondary library installation
-PACKAGES=("fio" "bc" "iperf3" "p7zip-full")
+PACKAGES=("fio" "bc" "iperf3" "p7zip")
     PACKAGES_TO_INSTALL=()
     NOT_FOUND_PACKAGES=()
 
