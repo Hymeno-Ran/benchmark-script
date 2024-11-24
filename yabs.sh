@@ -1020,17 +1020,18 @@ else
     DictSize="-md=4m"
 fi
 
-# Run the 7-zip benchmark single-threaded
+CPUCores=$(nproc)  # Get the total number of CPU cores available
 SEVENZIP=$(command -v 7za || command -v 7zr)
-taskset -c 0 "${SEVENZIP}" b ${DictSize} -mmt=1  
 
-# Set the number of CPU cores to use for multi-threaded benchmark
-CPUCores=$(nproc)  # Get the total number of CPU cores available, or set it manually
-
-# Run 7-zip benchmark multi-threaded
-echo "Running multi-threaded benchmark..."
-taskset -c 0-$((CPUCores-1)) "${SevenZip}" b ${DictSize} -mmt=${CPUCores} >>"${TempLog}" 2>/dev/null
-
+if [ $CPUCores -gt 1 ]; then
+	# Run 7-zip benchmark single-threaded
+	echo -e "Running single-threaded benchmark..."
+	taskset -c 0 "${SEVENZIP}" b ${DictSize} -mmt=1 
+else
+	# Run 7-zip benchmark multi-threaded
+	echo -e "Running multi-threaded benchmark..."
+	taskset -c 0-$((CPUCores-1)) "${SevenZip}" b ${DictSize} -mmt=${CPUCores}
+fi
 
 # finished all tests, clean up all YABS files and exit
 echo -e
