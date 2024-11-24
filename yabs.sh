@@ -1012,22 +1012,16 @@ PACKAGES=("fio" "bc" "iperf3" "p7zip")
         fi
     fi
 # 7zip benchmark
-echo -e "Processor: $CPU_PROC"
-echo -e "CPU Cores: $CPU_CORES"
-echo -e "CPU Frequency: $CPU_FREQ"
+echo -e "Running single thread bencmark"
+# Adjust DictSize based on available RAM
+if [ ${TOTAL_RAM_RAW} -lt 350000 ]; then
+    DictSize="-md=2m"
+else
+    DictSize="-md=4m"
+fi
 
-QuickAndDirtyPerformance=1000000   # assuming performance
-ClusterConfig=("config1" "config2" "config3")  # assuming 3 cluster
-RunHowManyTimes=10   # assuming running 10 times
-
-# single-threaded
-SingleThreadedDuration=$(( 20 + $(( ${QuickAndDirtyPerformance} * ${#ClusterConfig[@]} / 5000000 )) ))
-
-# cho multi-threaded
-MultiThreadedDuration=$(( ${RunHowManyTimes} * $(( 20 + $(( ${QuickAndDirtyPerformance} / 5000000 )) )) / ${CPU_CORES} ))
-
-echo "Single-threaded duration: ${SingleThreadedDuration} seconds"
-echo "Multi-threaded duration: ${MultiThreadedDuration} seconds"
+SEVENZIP=$(command -v 7za || command -v 7zr)
+taskset -c 0 "${SEVENZIP}" b ${DictSize} -mmt=1  
 
 # finished all tests, clean up all YABS files and exit
 echo -e
