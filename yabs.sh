@@ -1012,7 +1012,6 @@ PACKAGES=("fio" "bc" "iperf3" "p7zip")
         fi
     fi
 # 7zip benchmark
-echo -e "Running single thread bencmark"
 # Adjust DictSize based on available RAM
 if [ ${TOTAL_RAM_RAW} -lt 350000 ]; then
     DictSize="-md=2m"
