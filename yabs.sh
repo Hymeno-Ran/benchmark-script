@@ -1029,7 +1029,7 @@ if [ $CPUCores -gt 1 ]; then
 else
 	# Run 7-zip benchmark multi-threaded
 	echo -e "Running multi-threaded benchmark..."
-	taskset -c 0-$((CPUCores-1)) "${SevenZip}" b ${DictSize} -mmt=${CPUCores}
+	taskset -c 0-$((CPUCores-1)) "${SEVENZIP}" b ${DictSize} -mmt=${CPUCores}
 fi
 
 # finished all tests, clean up all YABS files and exit
