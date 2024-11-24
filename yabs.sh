@@ -1029,6 +1029,7 @@ if [ $CPUCores -gt 1 ]; then
 else
 	# Run 7-zip benchmark multi-threaded
 	echo -e "Running multi-threaded benchmark..."
+	echo -e "Tottal Core:${CPUCore} "
 	taskset -c 0-$((CPUCores-1)) "${SEVENZIP}" b ${DictSize} -mmt=${CPUCores}
 fi
 
