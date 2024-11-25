@@ -978,7 +978,7 @@ fi
 # 7zip benchmark test
 function run_7zip_benchmark() {
 	# Kiểm tra phiên bản 7-Zip
-	SEVEN_ZIP_CMD=$1
+	local SEVEN_ZIP_CMD=$1
 	$SEVEN_ZIP_CMD | head -n 1
 
 	# Chạy benchmark của 7-Zip
