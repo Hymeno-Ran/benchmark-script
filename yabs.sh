@@ -63,7 +63,7 @@ unset PREFER_BIN SKIP_FIO SKIP_IPERF SKIP_GEEKBENCH SKIP_NET PRINT_HELP REDUCE_N
 GEEKBENCH_6="True" # gb6 test enabled by default
 
 # get any arguments that were passed to the script and set the associated skip flags (if applicable)
-while getopts 'bfdignhr4596jw:s:' flag; do
+while getopts 'bfdignhr4596jw:s:7' flag; do
 	case "${flag}" in
 		b) PREFER_BIN="True" ;;
 		f) SKIP_FIO="True" ;;
@@ -80,6 +80,7 @@ while getopts 'bfdignhr4596jw:s:' flag; do
 		j) JSON+="j" ;; 
 		w) JSON+="w" && JSON_FILE=${OPTARG} ;;
 		s) JSON+="s" && JSON_SEND=${OPTARG} ;; 
+		7) 7ZIP="True";; # skip 7zip benchmark
 		*) exit 1 ;;
 	esac
 done
@@ -128,6 +129,7 @@ if [ ! -z "$PRINT_HELP" ]; then
 	echo -e "       -9 : use both geekbench 4 AND geekbench 5 instead of geekbench 6"
 	echo -e "       -6 : user geekbench 6 in addition to 4 and/or 5 (only needed if -4, -5, or -9 are set; -6 must come last)"
 	echo -e "       -j : print jsonified YABS results at conclusion of test"
+	echo -e "       -z : skips the 7zip test" # skip 7zip test
 	echo -e "       -w <filename> : write jsonified YABS results to disk using file name provided"
 	echo -e "       -s <url> : send jsonified YABS results to URL"
 	echo -e
@@ -974,63 +976,107 @@ if [ -z "$SKIP_GEEKBENCH" ]; then
 fi
 
 # secondary library installation
-PACKAGES=("fio" "bc" "iperf3" "p7zip")
-    PACKAGES_TO_INSTALL=()
-    NOT_FOUND_PACKAGES=()
+# PACKAGES=("fio" "bc" "iperf3" "p7zip")
+#     PACKAGES_TO_INSTALL=()
+#     NOT_FOUND_PACKAGES=()
 
-    for pkg in "${PACKAGES[@]}"; do
-        if ! command -v "$pkg" &>/dev/null; then
-            PACKAGES_TO_INSTALL+=("$pkg")
-        fi
-    done
+#     for pkg in "${PACKAGES[@]}"; do
+#         if ! command -v "$pkg" &>/dev/null; then
+#             PACKAGES_TO_INSTALL+=("$pkg")
+#         fi
+#     done
 
-    if [ ${#PACKAGES_TO_INSTALL[@]} -eq 0 ]; then
-        echo "All necessary apt packages found, continuing!"
-    else
-        echo "Installing missing packages..."
-        for pkg in "${PACKAGES_TO_INSTALL[@]}"; do
-            echo -n "Installing $pkg... "
-            if sudo yum install -y "$pkg" >/dev/null 2>&1; then
-                echo -e "\e[32m✓\e[0m"
-            else
-                echo -e "\e[31m✗\e[0m"
-                NOT_FOUND_PACKAGES+=("$pkg")
-            fi
-        done
+#     if [ ${#PACKAGES_TO_INSTALL[@]} -eq 0 ]; then
+#         echo "All necessary apt packages found, continuing!"
+#     else
+#         echo "Installing missing packages..."
+#         for pkg in "${PACKAGES_TO_INSTALL[@]}"; do
+#             echo -n "Installing $pkg... "
+#             if sudo yum install -y "$pkg" >/dev/null 2>&1; then
+#                 echo -e "\e[32m✓\e[0m"
+#             else
+#                 echo -e "\e[31m✗\e[0m"
+#                 NOT_FOUND_PACKAGES+=("$pkg")
+#             fi
+#         done
         
-        if [ ${#NOT_FOUND_PACKAGES[@]} -gt 0 ]; then
-            echo "The following packages were not found:"
-            for pkg in "${NOT_FOUND_PACKAGES[@]}"; do
-                echo -e "$pkg: \e[31mNot found ✗\e[0m"
-            done
+#         if [ ${#NOT_FOUND_PACKAGES[@]} -gt 0 ]; then
+#             echo "The following packages were not found:"
+#             for pkg in "${NOT_FOUND_PACKAGES[@]}"; do
+#                 echo -e "$pkg: \e[31mNot found ✗\e[0m"
+#             done
             
-            echo
-            if [[ ! $REPLY =~ ^[Yy]$ ]] && [[ ! -z $REPLY ]]; then
-                echo "Aborting..."
-                exit 1
-            fi
-        fi
+#             echo
+#             if [[ ! $REPLY =~ ^[Yy]$ ]] && [[ ! -z $REPLY ]]; then
+#                 echo "Aborting..."
+#                 exit 1
+#             fi
+#         fi
+#     fi
+
+# Kiểm tra nếu biến PREFER_BIN trống và đã có sẵn 7-Zip
+if [[ -z "$PREFER_BIN" && -x "$(command -v 7zz)" ]]; then
+    # Nếu 7-Zip đã được phát hiện, sử dụng bản đã cài đặt
+    SEVEN_ZIP_CMD=7zz
+else
+    # Tạo thư mục tạm để tải binary của 7-Zip
+    SEVEN_ZIP_PATH=$YABS_PATH/7zip
+    mkdir -p "$SEVEN_ZIP_PATH"
+
+    # Tải về binary của 7-Zip
+    ARCH=$(uname -m)
+    if [[ $ARCH == "x86_64" ]]; then
+        SEVEN_ZIP_URL="https://www.7-zip.org/a/7z2301-linux-x64.tar.xz"
+    else
+        echo "Không hỗ trợ kiến trúc $ARCH" >&2
+        exit 1
     fi
-# 7zip benchmark
-# Adjust DictSize based on available RAM
-if [ ${TOTAL_RAM_RAW} -lt 350000 ]; then
-    DictSize="-md=2m"
-else
-    DictSize="-md=4m"
+
+    if [[ ! -z $(command -v curl) ]]; then
+        curl -s --connect-timeout 5 --retry 5 --retry-delay 0 "$SEVEN_ZIP_URL" -o "$SEVEN_ZIP_PATH/7z.tar.xz"
+    else
+        wget -q -T 5 -t 5 -w 0 "$SEVEN_ZIP_URL" -O "$SEVEN_ZIP_PATH/7z.tar.xz"
+    fi
+
+    # Kiểm tra nếu tải thành công
+    if [ ! -f "$SEVEN_ZIP_PATH/7z.tar.xz" ]; then
+        echo "Tải xuống 7-Zip thất bại!" >&2
+        exit 1
+    fi
+
+    # Giải nén và thiết lập quyền
+    tar -xf "$SEVEN_ZIP_PATH/7z.tar.xz" -C "$SEVEN_ZIP_PATH"
+    chmod +x "$SEVEN_ZIP_PATH/7zz"
+
+    # Di chuyển binary vào /usr/bin để sử dụng toàn hệ thống
+    mv "$SEVEN_ZIP_PATH/7zz" /usr/local/bin/7zz
+
+    # Cấu hình command sử dụng từ /usr/bin
+    SEVEN_ZIP_CMD="/usr/local/bin/7zz"
 fi
 
-CPUCores=$(nproc)  # Get the total number of CPU cores available
-SEVENZIP=$(command -v 7za || command -v 7zr)
+# Kiểm tra phiên bản 7-Zip
+# $SEVEN_ZIP_CMD --version
+# # 7zip benchmark
+# # Adjust DictSize based on available RAM
+# if [ ${TOTAL_RAM_RAW} -lt 350000 ]; then
+#     DictSize="-md=2m"
+# else
+#     DictSize="-md=4m"
+# fi
 
-if [ $CPUCores -gt 1 ]; then
-	# Run 7-zip benchmark single-threaded
-	echo -e "Running single-threaded benchmark..."
-	taskset -c 0 "${SEVENZIP}" b ${DictSize} -mmt=1 
-else
-	# Run 7-zip benchmark multi-threaded
-	echo -e "Running multi-threaded benchmark..."
-	taskset -c 0-$((CPUCores-1)) "${SEVENZIP}" b ${DictSize} -mmt=${CPUCores}
-fi
+# CPUCores=$(nproc)  # Get the total number of CPU cores available
+# SEVENZIP=$(command -v 7za || command -v 7zr)
+
+# if [ $CPUCores -gt 1 ]; then
+# 	# Run 7-zip benchmark single-threaded
+# 	echo -e "Running single-threaded benchmark..."
+# 	taskset -c 0 "${SEVENZIP}" b ${DictSize} -mmt=1 
+# else
+# 	# Run 7-zip benchmark multi-threaded
+# 	echo -e "Running multi-threaded benchmark..."
+# 	taskset -c 0-$((CPUCores-1)) "${SEVENZIP}" b ${DictSize} -mmt=${CPUCores}
+# fi
 
 # finished all tests, clean up all YABS files and exit
 echo -e
