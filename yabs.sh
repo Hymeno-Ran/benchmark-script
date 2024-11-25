@@ -990,7 +990,7 @@ function run_7zip_benchmark() {
 		DictSize="-md=2m"
 	fi
 
-	# Lấy số lượng lõi CPU
+	# Get CPU core
 	CPUCores=$(nproc)
 
 	# Benchmark
