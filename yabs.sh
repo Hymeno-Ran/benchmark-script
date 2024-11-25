@@ -1007,14 +1007,20 @@ function run_7zip_benchmark() {
 	# filter and get result
 	COMPRESS_SPEED=$(echo "$BENCHMARK_RESULT" | grep "Avr" | awk 'NR==1 {print $2}')
 	DECOMPRESS_SPEED=$(echo "$BENCHMARK_RESULT" | grep "Avr" | awk 'NR==2 {print $2}')
+	VERSION=$(echo "$BENCHMARK_RESULT" | head -n 1)
+	JSON_VERSION=$(echo "$VERSION" | head -n 1)
 
 	echo -e "AVG Compress speed: $COMPRESS_SPEED KB/s"
-	echo -e "AVG Decompress spee: $DECOMPRESS_SPEED KB/s"
+	echo -e "AVG Decompress speed: $DECOMPRESS_SPEED KB/s"
+
+	if [ ! -z $JSON ]; then
+		JSON_RESULT+='{"version":'$JSON_VERSION',"compress_speed":'$COMPRESS_SPEED',"decompress_speed":'$DECOMPRESS_SPEED
+	fi
 
 }
 
 # Check if PREFER_BIN empty and alraedy install 7-Zip
-if [[ -z "$SKIP_7ZIP" && -x "$(command -v 7zz)" ]]; then
+if [[-x "$(command -v 7zz)" ]]; then
     SEVEN_ZIP_CMD=7zz
 else
     # Crated temp folder to install 7-Zip library
@@ -1054,8 +1060,14 @@ else
 
 fi
 
-run_7zip_benchmark $SEVEN_ZIP_CMD
+if [ -z "$SKIP_7ZIP" ]; then
+	[[ ! -z $JSON ]] && JSON_RESULT+=',"7zip":['
+	
+	run_7zip_benchmark $SEVEN_ZIP_CMD
 
+	[[ ! -z $JSON ]] && [[ $(echo -n $JSON_RESULT | tail -c 1) == ',' ]] && JSON_RESULT=${JSON_RESULT::${#JSON_RESULT}-1}
+	[[ ! -z $JSON ]] && JSON_RESULT+=']'
+fi
 
 
 # finished all tests, clean up all YABS files and exit
