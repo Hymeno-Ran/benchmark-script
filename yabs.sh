@@ -1035,11 +1035,19 @@ CPUCores=$(nproc)
 # Benchmark
 if [[ $CPUCores -gt 1 ]]; then
     echo "Running multi-threaded benchmark with $CPUCores threads..."
-    taskset -c 0-$((CPUCores-1)) $SEVEN_ZIP_CMD b $DictSize -mmt=$CPUCores
+    BENCHMARK_RESULT=$(taskset -c 0-$((CPUCores-1)) $SEVEN_ZIP_CMD b $DictSize -mmt=$CPUCores | tee )
 else
     echo "Running single-threaded benchmark..."
-    taskset -c 0 $SEVEN_ZIP_CMD b $DictSize -mmt=1
+    BENCHMARK_RESULT=$(taskset -c 0 $SEVEN_ZIP_CMD b $DictSize -mmt=1 | tee )
 fi
+
+# filter and get result
+COMPRESS_SPEED=$(echo "$BENCHMARK_RESULT" | grep "Avr" | awk 'NR==1 {print $2}')
+DECOMPRESS_SPEED=$(echo "$BENCHMARK_RESULT" | grep "Avr" | awk 'NR==2 {print $2}')
+
+echo -e "Tốc độ nén trung bình: $COMPRESS_SPEED KB/s"
+echo -e "Tốc độ giải nén trung bình: $DECOMPRESS_SPEED KB/s"
+
 
 
 # finished all tests, clean up all YABS files and exit
