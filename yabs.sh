@@ -1053,27 +1053,31 @@ else
 
     # Cấu hình command sử dụng từ /usr/bin
     SEVEN_ZIP_CMD="/usr/local/bin/7zz"
-	$SEVEN_ZIP_CMD --version
-	# 7zip benchmark
-	# Adjust DictSize based on available RAM
-	if [ ${TOTAL_RAM_RAW} -lt 350000 ]; then
-		DictSize="-md=2m"
-	else
-		DictSize="-md=4m"
-	fi
 
-	CPUCores=$(nproc)  # Get the total number of CPU cores available
+fi
 
-	if [ $CPUCores -gt 1 ]; then
-		# Run 7-zip benchmark single-threaded
-		echo -e "Running single-threaded benchmark..."
-		taskset -c 0 "${SEVEN_ZIP_CMD}" b ${DictSize} -mmt=1 
-	else
-		# Run 7-zip benchmark multi-threaded
-		echo -e "Running multi-threaded benchmark..."
-		taskset -c 0-$((CPUCores-1)) "${SEVEN_ZIP_CMD}" b ${DictSize} -mmt=${CPUCores}
-	fi
+# Kiểm tra phiên bản 7-Zip
+$SEVEN_ZIP_CMD --version
 
+# Chạy benchmark của 7-Zip
+echo -e "\n=== 7-Zip Benchmark ==="
+
+# Điều chỉnh DictSize dựa trên RAM khả dụng
+DictSize="-md=4m"  # Mặc định 4MB
+if [[ ${TOTAL_RAM_RAW:-0} -lt 350000 ]]; then
+    DictSize="-md=2m"
+fi
+
+# Lấy số lượng lõi CPU
+CPUCores=$(nproc)
+
+# Benchmark
+if [[ $CPUCores -gt 1 ]]; then
+    echo "Running multi-threaded benchmark with $CPUCores threads..."
+    taskset -c 0-$((CPUCores-1)) $SEVEN_ZIP_CMD b $DictSize -mmt=$CPUCores
+else
+    echo "Running single-threaded benchmark..."
+    taskset -c 0 $SEVEN_ZIP_CMD b $DictSize -mmt=1
 fi
 
 
