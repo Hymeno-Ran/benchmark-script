@@ -1014,34 +1014,36 @@ else
 
     # Cấu hình command sử dụng từ /usr/bin
     SEVEN_ZIP_CMD="/usr/local/bin/7zz"
-
+	run_7zip_benchmark
 fi
 
-# Kiểm tra phiên bản 7-Zip
-$SEVEN_ZIP_CMD | head -n 1
+function run_7zip_benchmark() {
+	# Kiểm tra phiên bản 7-Zip
+	$SEVEN_ZIP_CMD | head -n 1
 
-# Chạy benchmark của 7-Zip
-echo -e "\n=== 7-Zip Benchmark ==="
+	# Chạy benchmark của 7-Zip
+	echo -e "\n=== 7-Zip Benchmark ==="
 
-# Điều chỉnh DictSize dựa trên RAM khả dụng
-DictSize="-md=4m"  # Mặc định 4MB
-if [[ ${TOTAL_RAM_RAW:-0} -lt 350000 ]]; then
-    DictSize="-md=2m"
-fi
+	# Điều chỉnh DictSize dựa trên RAM khả dụng
+	DictSize="-md=4m"  # Mặc định 4MB
+	if [[ ${TOTAL_RAM_RAW:-0} -lt 350000 ]]; then
+		DictSize="-md=2m"
+	fi
 
-# Lấy số lượng lõi CPU
-CPUCores=$(nproc)
+	# Lấy số lượng lõi CPU
+	CPUCores=$(nproc)
 
-# Benchmark
-if [[ $CPUCores -gt 1 ]]; then
-    echo "Running multi-threaded benchmark with $CPUCores threads..."
-    BENCHMARK_RESULT=$(taskset -c 0-$((CPUCores-1)) $SEVEN_ZIP_CMD b $DictSize -mmt=$CPUCores | tee )
-else
-    echo "Running single-threaded benchmark..."
-    BENCHMARK_RESULT=$(taskset -c 0 $SEVEN_ZIP_CMD b $DictSize -mmt=1 | tee )
-fi
+	# Benchmark
+	if [[ $CPUCores -gt 1 ]]; then
+		echo "Running multi-threaded benchmark with $CPUCores threads..."
+		BENCHMARK_RESULT=$(taskset -c 0-$((CPUCores-1)) $SEVEN_ZIP_CMD b $DictSize -mmt=$CPUCores | tee )
+	else
+		echo "Running single-threaded benchmark..."
+		BENCHMARK_RESULT=$(taskset -c 0 $SEVEN_ZIP_CMD b $DictSize -mmt=1 | tee )
+	fi
 
-echo -e "Benchmark results saved to variable: $BENCHMARK_RESULT"
+	echo -e "Benchmark results saved to variable: $BENCHMARK_RESULT"
+}
 
 # filter and get result
 COMPRESS_SPEED=$(echo "$BENCHMARK_RESULT" | grep "Avr" | awk 'NR==1 {print $2}')
