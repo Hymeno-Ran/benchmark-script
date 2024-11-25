@@ -1015,8 +1015,7 @@ fi
 #     fi
 
 # Kiểm tra nếu biến PREFER_BIN trống và đã có sẵn 7-Zip
-SEVEN_ZIP_CMD=7zz
-if [[ -z "$PREFER_BIN" && -x "$(command -v 7zz)" ]]; then
+if [[ -x "$(command -v 7zz)" ]]; then
     # Nếu 7-Zip đã được phát hiện, sử dụng bản đã cài đặt
     SEVEN_ZIP_CMD=7zz
 else
@@ -1055,29 +1054,28 @@ else
     # Cấu hình command sử dụng từ /usr/bin
     SEVEN_ZIP_CMD="/usr/local/bin/7zz"
 	$SEVEN_ZIP_CMD --version
+	# 7zip benchmark
+	# Adjust DictSize based on available RAM
+	if [ ${TOTAL_RAM_RAW} -lt 350000 ]; then
+		DictSize="-md=2m"
+	else
+		DictSize="-md=4m"
+	fi
+
+	CPUCores=$(nproc)  # Get the total number of CPU cores available
+
+	if [ $CPUCores -gt 1 ]; then
+		# Run 7-zip benchmark single-threaded
+		echo -e "Running single-threaded benchmark..."
+		taskset -c 0 "${SEVEN_ZIP_CMD}" b ${DictSize} -mmt=1 
+	else
+		# Run 7-zip benchmark multi-threaded
+		echo -e "Running multi-threaded benchmark..."
+		taskset -c 0-$((CPUCores-1)) "${SEVEN_ZIP_CMD}" b ${DictSize} -mmt=${CPUCores}
+	fi
 
 fi
 
-# # 7zip benchmark
-# # Adjust DictSize based on available RAM
-# if [ ${TOTAL_RAM_RAW} -lt 350000 ]; then
-#     DictSize="-md=2m"
-# else
-#     DictSize="-md=4m"
-# fi
-
-# CPUCores=$(nproc)  # Get the total number of CPU cores available
-# SEVENZIP=$(command -v 7za || command -v 7zr)
-
-# if [ $CPUCores -gt 1 ]; then
-# 	# Run 7-zip benchmark single-threaded
-# 	echo -e "Running single-threaded benchmark..."
-# 	taskset -c 0 "${SEVENZIP}" b ${DictSize} -mmt=1 
-# else
-# 	# Run 7-zip benchmark multi-threaded
-# 	echo -e "Running multi-threaded benchmark..."
-# 	taskset -c 0-$((CPUCores-1)) "${SEVENZIP}" b ${DictSize} -mmt=${CPUCores}
-# fi
 
 # finished all tests, clean up all YABS files and exit
 echo -e
