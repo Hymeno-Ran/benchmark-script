@@ -1053,6 +1053,7 @@ else
 
     # Cấu hình command sử dụng từ /usr/bin
     SEVEN_ZIP_CMD="/usr/local/bin/7zz"
+	$SEVEN_ZIP_CMD --version
 fi
 
 # Kiểm tra phiên bản 7-Zip
