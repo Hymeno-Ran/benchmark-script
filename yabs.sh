@@ -1051,8 +1051,10 @@ else
 
     # Cấu hình command sử dụng từ /usr/bin
     SEVEN_ZIP_CMD="/usr/local/bin/7zz"
-	run_7zip_benchmark $SEVEN_ZIP_CMD
+
 fi
+
+run_7zip_benchmark $SEVEN_ZIP_CMD
 
 
 
