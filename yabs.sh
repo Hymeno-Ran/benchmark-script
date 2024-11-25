@@ -1054,9 +1054,10 @@ else
 
     # Cấu hình command sử dụng từ /usr/bin
     SEVEN_ZIP_CMD="/usr/local/bin/7zz"
-	echo -e "test cmd"
-	$SEVEN_ZIP_CMD --version
+
 fi
+echo -e "test cmd"
+$SEVEN_ZIP_CMD --version
 
 # # 7zip benchmark
 # # Adjust DictSize based on available RAM
