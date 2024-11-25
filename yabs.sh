@@ -1041,6 +1041,8 @@ else
     BENCHMARK_RESULT=$(taskset -c 0 $SEVEN_ZIP_CMD b $DictSize -mmt=1 | tee )
 fi
 
+echo -e "Benchmark results saved to variable: $BENCHMARK_RESULT"
+
 # filter and get result
 COMPRESS_SPEED=$(echo "$BENCHMARK_RESULT" | grep "Avr" | awk 'NR==1 {print $2}')
 DECOMPRESS_SPEED=$(echo "$BENCHMARK_RESULT" | grep "Avr" | awk 'NR==2 {print $2}')
