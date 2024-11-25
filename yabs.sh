@@ -978,14 +978,13 @@ fi
 
 # 7zip benchmark test
 function run_7zip_benchmark() {
-	# Kiểm tra phiên bản 7-Zip
+	# Check 7-zip version
 	local SEVEN_ZIP_CMD=$1
 	$SEVEN_ZIP_CMD | head -n 1
 
-	# Chạy benchmark của 7-Zip
 	echo -e "\n=== 7-Zip Benchmark ==="
 
-	# Điều chỉnh DictSize dựa trên RAM khả dụng
+	# Ajust DictSize based on avaiable RAM
 	DictSize="-md=4m"  # Mặc định 4MB
 	if [[ ${TOTAL_RAM_RAW:-0} -lt 350000 ]]; then
 		DictSize="-md=2m"
