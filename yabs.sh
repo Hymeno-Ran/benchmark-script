@@ -80,7 +80,7 @@ while getopts 'bfdignhr4596jw:s:7' flag; do
 		j) JSON+="j" ;; 
 		w) JSON+="w" && JSON_FILE=${OPTARG} ;;
 		s) JSON+="s" && JSON_SEND=${OPTARG} ;; 
-		7) 7ZIP="True";; # skip 7zip benchmark
+		7) SKIP_7ZIP="True";; # skip 7zip benchmark
 		*) exit 1 ;;
 	esac
 done
@@ -145,6 +145,7 @@ if [ ! -z "$PRINT_HELP" ]; then
 	[[ ! -z $GEEKBENCH_4 ]] && echo -e "       running geekbench 4"
 	[[ ! -z $GEEKBENCH_5 ]] && echo -e "       running geekbench 5"
 	[[ ! -z $GEEKBENCH_6 ]] && echo -e "       running geekbench 6"
+	[[ ! -z $SKIP_7ZIP ]] && echo -e "       -g, skipping 7zip test"
 	echo -e
 	echo -e "Local Binary Check:"
 	[[ -z $LOCAL_FIO ]] && echo -e "       fio not detected, will download precompiled binary" ||
@@ -1007,26 +1008,25 @@ function run_7zip_benchmark() {
 	COMPRESS_SPEED=$(echo "$BENCHMARK_RESULT" | grep "Avr" | awk 'NR==1 {print $2}')
 	DECOMPRESS_SPEED=$(echo "$BENCHMARK_RESULT" | grep "Avr" | awk 'NR==2 {print $2}')
 
-	echo -e "Tốc độ nén trung bình: $COMPRESS_SPEED KB/s"
-	echo -e "Tốc độ giải nén trung bình: $DECOMPRESS_SPEED KB/s"
+	echo -e "AVG Compress speed: $COMPRESS_SPEED KB/s"
+	echo -e "AVG Decompress spee: $DECOMPRESS_SPEED KB/s"
 
 }
 
-# Kiểm tra nếu biến PREFER_BIN trống và đã có sẵn 7-Zip
-if [[ -x "$(command -v 7zz)" ]]; then
-    # Nếu 7-Zip đã được phát hiện, sử dụng bản đã cài đặt
+# Check if PREFER_BIN empty and alraedy install 7-Zip
+if [[ -z "$SKIP_7ZIP" && -x "$(command -v 7zz)" ]]; then
     SEVEN_ZIP_CMD=7zz
 else
-    # Tạo thư mục tạm để tải binary của 7-Zip
+    # Crated temp folder to install 7-Zip library
     SEVEN_ZIP_PATH=$YABS_PATH/7zip
     mkdir -p "$SEVEN_ZIP_PATH"
 
-    # Tải về binary của 7-Zip
+    # Download 7-Zip library
     ARCH=$(uname -m)
     if [[ $ARCH == "x86_64" ]]; then
         SEVEN_ZIP_URL="https://www.7-zip.org/a/7z2301-linux-x64.tar.xz"
     else
-        echo "Không hỗ trợ kiến trúc $ARCH" >&2
+        echo -e "No support architect $ARCH" >&2
         exit 1
     fi
 
@@ -1036,20 +1036,20 @@ else
         wget -q -T 5 -t 5 -w 0 "$SEVEN_ZIP_URL" -O "$SEVEN_ZIP_PATH/7z.tar.xz"
     fi
 
-    # Kiểm tra nếu tải thành công
+    # Check if download successfull
     if [ ! -f "$SEVEN_ZIP_PATH/7z.tar.xz" ]; then
-        echo "Tải xuống 7-Zip thất bại!" >&2
+        echo -e "Download 7-Zip failed!" >&2
         exit 1
     fi
 
-    # Giải nén và thiết lập quyền
+    # Compress and setup permission
     tar -xf "$SEVEN_ZIP_PATH/7z.tar.xz" -C "$SEVEN_ZIP_PATH"
     chmod +x "$SEVEN_ZIP_PATH/7zz"
 
-    # Di chuyển binary vào /usr/bin để sử dụng toàn hệ thống
+    # Move binary to /usr/local/bin
     mv "$SEVEN_ZIP_PATH/7zz" /usr/local/bin/7zz
 
-    # Cấu hình command sử dụng từ /usr/bin
+    # configure command use form /usr/local/bin
     SEVEN_ZIP_CMD="/usr/local/bin/7zz"
 
 fi
