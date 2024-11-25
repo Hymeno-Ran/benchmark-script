@@ -1015,6 +1015,7 @@ fi
 #     fi
 
 # Kiểm tra nếu biến PREFER_BIN trống và đã có sẵn 7-Zip
+SEVEN_ZIP_CMD=7zz
 if [[ -z "$PREFER_BIN" && -x "$(command -v 7zz)" ]]; then
     # Nếu 7-Zip đã được phát hiện, sử dụng bản đã cài đặt
     SEVEN_ZIP_CMD=7zz
@@ -1053,11 +1054,10 @@ else
 
     # Cấu hình command sử dụng từ /usr/bin
     SEVEN_ZIP_CMD="/usr/local/bin/7zz"
+	echo -e "test cmd"
 	$SEVEN_ZIP_CMD --version
 fi
 
-# Kiểm tra phiên bản 7-Zip
-# $SEVEN_ZIP_CMD --version
 # # 7zip benchmark
 # # Adjust DictSize based on available RAM
 # if [ ${TOTAL_RAM_RAW} -lt 350000 ]; then
