@@ -1020,7 +1020,7 @@ function run_7zip_benchmark() {
 }
 
 # Check if PREFER_BIN empty and alraedy install 7-Zip
-if [[-x "$(command -v 7zz)" ]]; then
+if [[ -x "$(command -v 7zz)" ]]; then
     SEVEN_ZIP_CMD=7zz
 else
     # Crated temp folder to install 7-Zip library
@@ -1067,6 +1067,8 @@ if [ -z "$SKIP_7ZIP" ]; then
 
 	[[ ! -z $JSON ]] && [[ $(echo -n $JSON_RESULT | tail -c 1) == ',' ]] && JSON_RESULT=${JSON_RESULT::${#JSON_RESULT}-1}
 	[[ ! -z $JSON ]] && JSON_RESULT+=']'
+
+	echo -e $JSON_RESULT
 fi
 
 
