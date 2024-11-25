@@ -997,15 +997,15 @@ function run_7zip_benchmark() {
 	# Benchmark
 	if [[ $CPUCores -gt 1 ]]; then
 		echo "Running multi-threaded benchmark with $CPUCores threads..."
-		BENCHMARK_RESULT=$(taskset -c 0-$((CPUCores-1)) $SEVEN_ZIP_CMD b $DictSize -mmt=$CPUCores | tee )
+		BENCHMARK_RESULT=$(taskset -c 0-$((CPUCores-1)) $SEVEN_ZIP_CMD b $DictSize -mmt=$CPUCores | grep -v "CPU:" | tee )
 	else
 		echo "Running single-threaded benchmark..."
-		BENCHMARK_RESULT=$(taskset -c 0 $SEVEN_ZIP_CMD b $DictSize -mmt=1 | tee )
+		BENCHMARK_RESULT=$(taskset -c 0 $SEVEN_ZIP_CMD b $DictSize -mmt=1 | grep -v "CPU:" | tee )
 	fi
 
 	echo -e "Benchmark results saved to variable: $BENCHMARK_RESULT"
 	# filter and get result
-	COMPRESS_SPEED=$(echo "$BENCHMARK_RESULT" | grep "Avr" | awk 'NR==1 {print $2}')
+	COMPRESS_SPEED=$(echo "$BENCHMARK_RESULT" | grep "Avr"  | awk 'NR==1 {print $2}')
 	DECOMPRESS_SPEED=$(echo "$BENCHMARK_RESULT" | grep "Avr" | awk 'NR==2 {print $2}')
 	VERSION=$(echo "$BENCHMARK_RESULT" | head -n 1)
 	JSON_VERSION=$(echo "$VERSION" | head -n 1)
