@@ -975,6 +975,35 @@ if [ -z "$SKIP_GEEKBENCH" ]; then
 	[[ ! -z $JSON ]] && JSON_RESULT+=']'
 fi
 
+# 7zip benchmark test
+function run_7zip_benchmark() {
+	# Kiểm tra phiên bản 7-Zip
+	$SEVEN_ZIP_CMD | head -n 1
+
+	# Chạy benchmark của 7-Zip
+	echo -e "\n=== 7-Zip Benchmark ==="
+
+	# Điều chỉnh DictSize dựa trên RAM khả dụng
+	DictSize="-md=4m"  # Mặc định 4MB
+	if [[ ${TOTAL_RAM_RAW:-0} -lt 350000 ]]; then
+		DictSize="-md=2m"
+	fi
+
+	# Lấy số lượng lõi CPU
+	CPUCores=$(nproc)
+
+	# Benchmark
+	if [[ $CPUCores -gt 1 ]]; then
+		echo "Running multi-threaded benchmark with $CPUCores threads..."
+		BENCHMARK_RESULT=$(taskset -c 0-$((CPUCores-1)) $SEVEN_ZIP_CMD b $DictSize -mmt=$CPUCores | tee )
+	else
+		echo "Running single-threaded benchmark..."
+		BENCHMARK_RESULT=$(taskset -c 0 $SEVEN_ZIP_CMD b $DictSize -mmt=1 | tee )
+	fi
+
+	echo -e "Benchmark results saved to variable: $BENCHMARK_RESULT"
+}
+
 # Kiểm tra nếu biến PREFER_BIN trống và đã có sẵn 7-Zip
 if [[ -x "$(command -v 7zz)" ]]; then
     # Nếu 7-Zip đã được phát hiện, sử dụng bản đã cài đặt
@@ -1017,33 +1046,6 @@ else
 	run_7zip_benchmark
 fi
 
-function run_7zip_benchmark() {
-	# Kiểm tra phiên bản 7-Zip
-	$SEVEN_ZIP_CMD | head -n 1
-
-	# Chạy benchmark của 7-Zip
-	echo -e "\n=== 7-Zip Benchmark ==="
-
-	# Điều chỉnh DictSize dựa trên RAM khả dụng
-	DictSize="-md=4m"  # Mặc định 4MB
-	if [[ ${TOTAL_RAM_RAW:-0} -lt 350000 ]]; then
-		DictSize="-md=2m"
-	fi
-
-	# Lấy số lượng lõi CPU
-	CPUCores=$(nproc)
-
-	# Benchmark
-	if [[ $CPUCores -gt 1 ]]; then
-		echo "Running multi-threaded benchmark with $CPUCores threads..."
-		BENCHMARK_RESULT=$(taskset -c 0-$((CPUCores-1)) $SEVEN_ZIP_CMD b $DictSize -mmt=$CPUCores | tee )
-	else
-		echo "Running single-threaded benchmark..."
-		BENCHMARK_RESULT=$(taskset -c 0 $SEVEN_ZIP_CMD b $DictSize -mmt=1 | tee )
-	fi
-
-	echo -e "Benchmark results saved to variable: $BENCHMARK_RESULT"
-}
 
 # filter and get result
 COMPRESS_SPEED=$(echo "$BENCHMARK_RESULT" | grep "Avr" | awk 'NR==1 {print $2}')
