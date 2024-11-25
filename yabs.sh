@@ -129,7 +129,7 @@ if [ ! -z "$PRINT_HELP" ]; then
 	echo -e "       -9 : use both geekbench 4 AND geekbench 5 instead of geekbench 6"
 	echo -e "       -6 : user geekbench 6 in addition to 4 and/or 5 (only needed if -4, -5, or -9 are set; -6 must come last)"
 	echo -e "       -j : print jsonified YABS results at conclusion of test"
-	echo -e "       -z : skips the 7zip test" # skip 7zip test
+	echo -e "       -7 : skips the 7zip test" # skip 7zip test
 	echo -e "       -w <filename> : write jsonified YABS results to disk using file name provided"
 	echo -e "       -s <url> : send jsonified YABS results to URL"
 	echo -e
