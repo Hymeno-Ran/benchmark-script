@@ -978,6 +978,7 @@ fi
 # 7zip benchmark test
 function run_7zip_benchmark() {
 	# Kiểm tra phiên bản 7-Zip
+	SEVEN_ZIP_CMD=$1
 	$SEVEN_ZIP_CMD | head -n 1
 
 	# Chạy benchmark của 7-Zip
@@ -1002,6 +1003,13 @@ function run_7zip_benchmark() {
 	fi
 
 	echo -e "Benchmark results saved to variable: $BENCHMARK_RESULT"
+	# filter and get result
+	COMPRESS_SPEED=$(echo "$BENCHMARK_RESULT" | grep "Avr" | awk 'NR==1 {print $2}')
+	DECOMPRESS_SPEED=$(echo "$BENCHMARK_RESULT" | grep "Avr" | awk 'NR==2 {print $2}')
+
+	echo -e "Tốc độ nén trung bình: $COMPRESS_SPEED KB/s"
+	echo -e "Tốc độ giải nén trung bình: $DECOMPRESS_SPEED KB/s"
+
 }
 
 # Kiểm tra nếu biến PREFER_BIN trống và đã có sẵn 7-Zip
@@ -1043,16 +1051,8 @@ else
 
     # Cấu hình command sử dụng từ /usr/bin
     SEVEN_ZIP_CMD="/usr/local/bin/7zz"
-	run_7zip_benchmark
+	run_7zip_benchmark $SEVEN_ZIP_CMD
 fi
-
-
-# filter and get result
-COMPRESS_SPEED=$(echo "$BENCHMARK_RESULT" | grep "Avr" | awk 'NR==1 {print $2}')
-DECOMPRESS_SPEED=$(echo "$BENCHMARK_RESULT" | grep "Avr" | awk 'NR==2 {print $2}')
-
-echo -e "Tốc độ nén trung bình: $COMPRESS_SPEED KB/s"
-echo -e "Tốc độ giải nén trung bình: $DECOMPRESS_SPEED KB/s"
 
 
 
