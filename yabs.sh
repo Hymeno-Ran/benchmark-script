@@ -1013,7 +1013,7 @@ function run_7zip_benchmark() {
 	echo -e "AVG Decompress speed: $DECOMPRESS_SPEED KB/s"
 
 	if [ ! -z $JSON ]; then
-		JSON_RESULT+='{"version":'$JSON_VERSION',"compress_speed":'$COMPRESS_SPEED',"decompress_speed":'$DECOMPRESS_SPEED'}
+		JSON_RESULT+='{"version":'$JSON_VERSION',"compress_speed":'$COMPRESS_SPEED',"decompress_speed":'$DECOMPRESS_SPEED'}'
 	fi
 
 }
