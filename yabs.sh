@@ -1000,7 +1000,7 @@ function run_7zip_benchmark() {
 		echo -e "Executing benchmark ${RunHowManyTimes} times multi-threaded on CPUs"
 		for ((i=1;i<=RunHowManyTimes;i++)); do
 			echo -e "Running multi-threaded benchmark with $CPUCores threads (Attempt $i of $RunHowManyTimes)"
-			BENCHMARK_RESULT=$(taskset -c 0- $SEVEN_ZIP_CMD b $DictSize -mmt=$CPUCores | tee )
+			BENCHMARK_RESULT=$(taskset -c 0-$((CPUCores - 1)) $SEVEN_ZIP_CMD b $DictSize -mmt=$CPUCores | tee )
 			# filter and get result
 			COMPRESS_SPEED=$(echo "$BENCHMARK_RESULT" | grep "Avr"  | awk 'NR==1 {print $2}')
 			DECOMPRESS_SPEED=$(echo "$BENCHMARK_RESULT" | grep "Avr"  | awk 'NR==1 {print $7}')
