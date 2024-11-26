@@ -992,34 +992,46 @@ function run_7zip_benchmark() {
 
 	# Get CPU core
 	CPUCores=$(nproc)
+	# Number of test run
+	RunHowManyTimes=3
 
 	# Benchmark
 	if [[ $CPUCores -gt 1 ]]; then
-		echo "Running multi-threaded benchmark with $CPUCores threads..."
-		BENCHMARK_RESULT=$(taskset -c 0-$((CPUCores-1)) $SEVEN_ZIP_CMD b $DictSize -mmt=$CPUCores | tee )
+		echo -e "Executing benchmark ${RunHowManyTimes} times multi-threaded on CPUs"
+		for ((i=1;i<=RunHowManyTimes;i++)); do
+			echo -e "Running multi-threaded benchmark with $CPUCores threads (Attempt $i of $RunHowManyTimes)"
+			BENCHMARK_RESULT=$(taskset -c 0- $SEVEN_ZIP_CMD b $DictSize -mmt=$CPUCores | tee )
+			# filter and get result
+			COMPRESS_SPEED=$(echo "$BENCHMARK_RESULT" | grep "Avr"  | awk 'NR==1 {print $2}')
+			DECOMPRESS_SPEED=$(echo "$BENCHMARK_RESULT" | grep "Avr"  | awk 'NR==1 {print $7}')
+
+			echo -e "AVG Compress speed: $COMPRESS_SPEED KB/s"
+			echo -e "AVG Decompress speed: $DECOMPRESS_SPEED KB/s"
+			if [ ! -z $JSON ]; then
+				JSON_RESULT+='{"attempt":'$i',"compress_speed":'$COMPRESS_SPEED',"decompress_speed":'$DECOMPRESS_SPEED'},'
+			fi
+		done
 	else
 		echo "Running single-threaded benchmark..."
 		BENCHMARK_RESULT=$(taskset -c 0 $SEVEN_ZIP_CMD b $DictSize -mmt=1 | tee )
+		# filter and get result
+		COMPRESS_SPEED=$(echo "$BENCHMARK_RESULT" | grep "Avr"  | awk 'NR==1 {print $2}')
+		DECOMPRESS_SPEED=$(echo "$BENCHMARK_RESULT" | grep "Avr"  | awk 'NR==1 {print $7}')
+
+
+		echo -e "AVG Compress speed: $COMPRESS_SPEED KB/s"
+		echo -e "AVG Decompress speed: $DECOMPRESS_SPEED KB/s"
+
+		if [ ! -z $JSON ]; then
+			JSON_RESULT+='{"cpu_core":'$CPUCores',"compress_speed":'$COMPRESS_SPEED',"decompress_speed":'$DECOMPRESS_SPEED'},'
+		fi
 	fi
 
 	echo -e "Benchmark results saved to variable: $(echo "$BENCHMARK_RESULT" | grep -v "CPU" )"
-	# filter and get result
-	COMPRESS_SPEED=$(echo "$BENCHMARK_RESULT" | grep "Avr"  | awk 'NR==1 {print $2}')
-	DECOMPRESS_SPEED=$(echo "$BENCHMARK_RESULT" | grep "Avr"  | awk 'NR==1 {print $7}')
-	VERSION=$(echo "$BENCHMARK_RESULT" | head -n 1)
-	JSON_VERSION=$(echo "$VERSION" | head -n 1)
-
-	echo -e "AVG Compress speed: $COMPRESS_SPEED KB/s"
-	echo -e "AVG Decompress speed: $DECOMPRESS_SPEED KB/s"
-
-	if [ ! -z $JSON ]; then
-		JSON_RESULT+='{"version":'$JSON_VERSION',"compress_speed":'$COMPRESS_SPEED',"decompress_speed":'$DECOMPRESS_SPEED'}'
-	fi
-
 }
 
-# Check if PREFER_BIN empty and alraedy install 7-Zip
-if [[ -x "$(command -v 7zz)" ]]; then
+# Check if SKIP_7ZIP empty and alraedy install 7-Zip
+if [[ -z "$SKIP_7ZIP" && -x "$(command -v 7zz)" ]]; then
     SEVEN_ZIP_CMD=7zz
 else
     # Crated temp folder to install 7-Zip library
