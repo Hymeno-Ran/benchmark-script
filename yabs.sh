@@ -1007,6 +1007,9 @@ function run_7zip_benchmark() {
 
 			echo -e "AVG Compress speed: $COMPRESS_SPEED KB/s"
 			echo -e "AVG Decompress speed: $DECOMPRESS_SPEED KB/s"
+
+			echo -e "Benchmark results saved to variable: $(echo "$BENCHMARK_RESULT" | grep -v "CPU" )"
+
 			if [ ! -z $JSON ]; then
 				JSON_RESULT+='{"attempt":'$i',"compress_speed":'$COMPRESS_SPEED',"decompress_speed":'$DECOMPRESS_SPEED'},'
 			fi
@@ -1022,12 +1025,12 @@ function run_7zip_benchmark() {
 		echo -e "AVG Compress speed: $COMPRESS_SPEED KB/s"
 		echo -e "AVG Decompress speed: $DECOMPRESS_SPEED KB/s"
 
+		echo -e "Benchmark results saved to variable: $(echo "$BENCHMARK_RESULT" | grep -v "CPU" )"
+
 		if [ ! -z $JSON ]; then
 			JSON_RESULT+='{"cpu_core":'$CPUCores',"compress_speed":'$COMPRESS_SPEED',"decompress_speed":'$DECOMPRESS_SPEED'},'
 		fi
 	fi
-
-	echo -e "Benchmark results saved to variable: $(echo "$BENCHMARK_RESULT" | grep -v "CPU" )"
 }
 
 # Check if SKIP_7ZIP empty and alraedy install 7-Zip
