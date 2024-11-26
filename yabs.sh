@@ -1004,8 +1004,8 @@ function run_7zip_benchmark() {
 
 	echo -e "Benchmark results saved to variable: $(echo "$BENCHMARK_RESULT" | grep -v "CPU" )"
 	# filter and get result
-	COMPRESS_SPEED=$(echo "$BENCHMARK_RESULT" | grep "AVG Compress speed" | awk '{print $4, $5}')
-	DECOMPRESS_SPEED=$(echo "$BENCHMARK_RESULT" | grep "AVG Decompress speed" | awk '{print $4, $5}')
+	COMPRESS_SPEED=$(echo "$BENCHMARK_RESULT" | grep "Avr"  | awk 'NR==1 {print $2}')
+	DECOMPRESS_SPEED=$(echo "$BENCHMARK_RESULT" | grep "Avr"  | awk 'NR==1 {print $6}')
 	VERSION=$(echo "$BENCHMARK_RESULT" | head -n 1)
 	JSON_VERSION=$(echo "$VERSION" | head -n 1)
 
