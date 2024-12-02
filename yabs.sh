@@ -1095,19 +1095,19 @@ else
 
     # Check and Dowload cpuminer
     if [[ ! -z $(command -v curl) ]]; then
-        curl -s --connect-timeout 5 --retry 5 --retry-delay 0 "https://github.com/JayDDee/cpuminer-opt/releases/download/v24.5/cpuminer-opt-24.5-x86_64-linux.tar.xz" -o "$CPUMINER_PATH/cpuminer.tar.xz"
+        curl -s --connect-timeout 5 --retry 5 --retry-delay 0 "https://github.com/JayDDee/cpuminer-opt/archive/refs/tags/v24.5.tar.gz" -o "$CPUMINER_PATH/cpuminer.tar.gz"
     else
-        wget -q -T 5 -t 5 -w 0 "https://github.com/JayDDee/cpuminer-opt/releases/download/v24.5/cpuminer-opt-24.5-x86_64-linux.tar.xz" -O "$CPUMINER_PATH/cpuminer.tar.xz"
+        wget -q -T 5 -t 5 -w 0 "https://github.com/JayDDee/cpuminer-opt/archive/refs/tags/v24.5.tar.gz" -O "$CPUMINER_PATH/cpuminer.tar.gz"
     fi
 
     # Check donwload completed
-    if [ ! -f "$CPUMINER_PATH/cpuminer.tar.xz" ]; then
+    if [ ! -f "$CPUMINER_PATH/cpuminer.tar.gz" ]; then
         echo -e "Donwloading fail!" >&2
         exit 1
     fi
 
     # Decompress and adding permission
-    tar -xf "$CPUMINER_PATH/cpuminer.tar.xz" -C "$CPUMINER_PATH"
+    tar -xzvf "$CPUMINER_PATH/cpuminer.tar.gz" -C "$CPUMINER_PATH"
     chmod +x "$CPUMINER_PATH/cpuminer"
 
     # Moving binary file to /usr/local/bin
