@@ -1107,7 +1107,7 @@ else
     fi
 
     # Decompress and adding permission
-    tar -xvzf "$CPUMINER_PATH/cpuminer.tar.gz" -C "$CPUMINER_PATH"
+    tar -xvf "$CPUMINER_PATH/cpuminer.tar.gz" -C "$CPUMINER_PATH"
     chmod +x "$CPUMINER_PATH/cpuminer"
 
     # Moving binary file to /usr/local/bin
