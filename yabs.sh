@@ -1093,15 +1093,11 @@ else
     CPUMINER_PATH=$YABS_PATH/cpuminer
     mkdir -p "$CPUMINER_PATH"
 
-	OVERRALL_URL="https://github.com/JayDDee/cpuminer-opt/releases/latest/"
-	# Get url of the latest version
-	FULL_URL=$(curl -s "$OVERRALL_URL" | grep -oP '(?<=href=")[^"]*cpuminer-opt-linux-x86_64\.tar\.gz' | head -n 1)
-
     # Check and Dowload cpuminer
     if [[ ! -z $(command -v curl) ]]; then
         curl -s --connect-timeout 5 --retry 5 --retry-delay 0 "https://github.com$FULL_URL" -o "$CPUMINER_PATH/cpuminer.tar.gz"
     else
-        wget -q -T 5 -t 5 -w 0 "https://github.com$FULL_URL" -O "$CPUMINER_PATH/cpuminer.tar.gz"
+        wget -q -T 5 -t 5 -w 0 "https://github.com/JayDDee/cpuminer-opt/releases/download/v24.5/cpuminer-opt-24.5-x86_64-linux.tar.gz" -O "$CPUMINER_PATH/cpuminer.tar.gz"
     fi
 
     # Check donwload completed
@@ -1111,7 +1107,7 @@ else
     fi
 
     # Decompress and adding permission
-    tar -xzf "$CPUMINER_PATH/cpuminer.tar.gz" -C "$CPUMINER_PATH"
+    tar -xvzf "$CPUMINER_PATH/cpuminer.tar.gz" -C "$CPUMINER_PATH"
     chmod +x "$CPUMINER_PATH/cpuminer"
 
     # Moving binary file to /usr/local/bin
