@@ -1085,6 +1085,51 @@ if [ -z "$SKIP_7ZIP" ]; then
 	echo -e $JSON_RESULT
 fi
 
+# Check if SKIP_CPUMINER empty and alraedy install cpuminer
+if [[ -z "$SKIP_CPUMINER" && -x "$(command -v cpuminer)" ]]; then
+    CPUMINER_CMD=cpuminer
+else
+    # Create tmp folder to install cpuminer
+    CPUMINER_PATH=$YABS_PATH/cpuminer
+    mkdir -p "$CPUMINER_PATH"
+
+	OVERRALL_URL="https://github.com/JayDDee/cpuminer-opt/releases/latest/"
+	# Get url of the latest version
+	FULL_URL=$(curl -s "$OVERRALL_URL" | grep -oP '(?<=href=")[^"]*cpuminer-opt-linux-x86_64\.tar\.gz' | head -n 1)
+
+    # Check and Dowload cpuminer
+    if [[ ! -z $(command -v curl) ]]; then
+        curl -s --connect-timeout 5 --retry 5 --retry-delay 0 "https://github.com$FULL_URL" -o "$CPUMINER_PATH/cpuminer.tar.gz"
+    else
+        wget -q -T 5 -t 5 -w 0 "https://github.com$FULL_URL" -O "$CPUMINER_PATH/cpuminer.tar.gz"
+    fi
+
+    # Check donwload completed
+    if [ ! -f "$CPUMINER_PATH/cpuminer.tar.gz" ]; then
+        echo -e "Donwloading fail!" >&2
+        exit 1
+    fi
+
+    # Decompress and adding permission
+    tar -xzf "$CPUMINER_PATH/cpuminer.tar.gz" -C "$CPUMINER_PATH"
+    chmod +x "$CPUMINER_PATH/cpuminer"
+
+    # Moving binary file to /usr/local/bin
+    mv "$CPUMINER_PATH/cpuminer" /usr/local/bin/cpuminer
+
+    # Cofigure cmd /usr/local/bin
+    CPUMINER_CMD="/usr/local/bin/cpuminer"
+fi
+
+# Check cpuminer version
+if [[ -x "$CPUMINER_CMD" ]]; then
+    echo -e "Installation completed!"
+    $CPUMINER_CMD --version
+else
+    echo -e "Installation failed!" >&2
+    exit 1
+fi
+
 
 # finished all tests, clean up all YABS files and exit
 echo -e
