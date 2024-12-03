@@ -1095,9 +1095,9 @@ else
 
     # Check and Dowload cpuminer
     if [[ ! -z $(command -v curl) ]]; then
-        curl -s --connect-timeout 5 --retry 5 --retry-delay 0 "https://github.com/JayDDee/cpuminer-opt/archive/refs/tags/v24.4.tar.gz" -o "$CPUMINER_PATH/cpuminer.tar.gz"
+        curl "https://github.com/JayDDee/cpuminer-opt/archive/refs/tags/v24.4.tar.gz" -o "$CPUMINER_PATH/cpuminer.tar.gz"
     else
-        wget -q -T 5 -t 5 -w 0 "https://github.com/JayDDee/cpuminer-opt/archive/refs/tags/v24.4.tar.gz" -O "$CPUMINER_PATH/cpuminer.tar.gz"
+        wget "https://github.com/JayDDee/cpuminer-opt/archive/refs/tags/v24.4.tar.gz" -O "$CPUMINER_PATH/cpuminer.tar.gz"
     fi
 
     # Check donwload completed
