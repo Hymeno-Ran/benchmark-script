@@ -1109,10 +1109,10 @@ else
     # Decompress and adding permission
 	# file "$CPUMINER_PATH/cpuminer.tar.gz"
     tar -xzf "$CPUMINER_PATH/cpuminer.tar.gz" -C "$CPUMINER_PATH"
-    chmod +x "$CPUMINER_PATH/cpuminer-*"
+    chmod +x "$CPUMINER_PATH/cpuminer-opt-24.4"
 
     # Moving binary file to /usr/local/bin
-    mv "$CPUMINER_PATH/cpuminer-*" /usr/local/bin/cpuminer
+    mv "$CPUMINER_PATH/cpuminer-opt-24.4"" /usr/local/bin/cpuminer
 
     # Cofigure cmd /usr/local/bin
     CPUMINER_CMD="/usr/local/bin/cpuminer"
