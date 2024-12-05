@@ -1112,7 +1112,7 @@ else
     chmod +x "$CPUMINER_PATH/*"
 
     # Moving binary file to /usr/local/bin
-    mv "$CPUMINER_PATH/cpuminer*" /usr/local/bin/cpuminer
+    mv "$CPUMINER_PATH/*" /usr/local/bin/cpuminer
 
     # Cofigure cmd /usr/local/bin
     CPUMINER_CMD="/usr/local/bin/cpuminer"
