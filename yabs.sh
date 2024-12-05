@@ -1119,13 +1119,13 @@ else
 fi
 
 # Check cpuminer version
-# if [[ -x "$CPUMINER_CMD" ]]; then
-#     echo -e "Installation completed!"
-#     $CPUMINER_CMD --version
-# else
-#     echo -e "Installation failed!" >&2
-#     exit 1
-# fi
+if [[ -x "$CPUMINER_CMD" ]]; then
+    echo -e "Installation completed!"
+    $CPUMINER_CMD --version
+else
+    echo -e "Installation failed!" >&2
+    exit 1
+fi
 
 
 # finished all tests, clean up all YABS files and exit
